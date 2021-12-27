@@ -88,11 +88,11 @@ jobs:
       - name: Dazzle build
         run: |
           cd dazzle-rewrite
-          dazzle build localhost:8080 -v
+          dazzle build localhost:8080/prince-tf-experiments/dazzle -v
 
       - name: Dazzle combine
         run: |
           cd dazzle-rewrite
-          dazzle combine localhost:8080 --all -v
+          dazzle combine localhost:8080/prince-tf-experiments/dazzle --all -v
       # - run: cd dazzle-rewrite && dazzle build europe-docker.pkg.dev/prince-tf-experiments/workspace-images${ARTIFACT_REPO_SUB_PATH}
       # - run: cd dazzle-rewrite && dazzle combine europe-docker.pkg.dev/prince-tf-experiments/workspace-images${ARTIFACT_REPO_SUB_PATH} --all

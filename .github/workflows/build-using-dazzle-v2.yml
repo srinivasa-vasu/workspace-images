@@ -10,8 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     env:
       ARTIFACT_REPO_SUB_PATH: ""
       WORKLOAD_IDENTITY_POOL_ID: projects/119379277405/locations/global/workloadIdentityPools/workspace-images-github-actions/providers/workspace-images-gha-provider
@@ -21,11 +21,11 @@ jobs:
     steps:
       - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)"
 
       - name: Get branch name (pull request)
         if: github.event_name == 'pull_request'
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)"
 
       # - name: Set image build repo sub path
       #   if: ${{ env.BRANCH_NAME }} != 'master'
@@ -35,16 +35,20 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17.5
+        env:
+          RUNNER_TEMP: /tmp
 
       - name: Checkout dazzle
         uses: actions/checkout@v2
         with:
           repository: gitpod-io/dazzle
+          path: dazzle-source
 
       - name: Installing dazzle
         run: |
-          go get -v ./...
-          go generate -v ./...
+          cd dazzle-source
+          go get ./...
+          go generate ./...
           go install
 
       - name: Checkout workspace-images
@@ -65,11 +69,11 @@ jobs:
           version: 366.0.0
 
       # authenticate here, if we authenticate too early, the docker credential file is unavailable
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v0.4.3'
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v0.4.3"
         with:
-          token_format: 'access_token'
+          token_format: "access_token"
           workload_identity_provider: ${{env.WORKLOAD_IDENTITY_POOL_ID}}
           service_account: ${{env.IAM_SERVICE_ACCOUNT}}
 

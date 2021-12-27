@@ -17,6 +17,7 @@ jobs:
       WORKLOAD_IDENTITY_POOL_ID: projects/119379277405/locations/global/workloadIdentityPools/workspace-images-github-actions/providers/workspace-images-gha-provider
       IMAGE_REPO: europe-docker.pkg.dev/workspace-base-images/workspace-base-images/workspace-base-images
       IAM_SERVICE_ACCOUNT: workspace-images-gha-sa@workspace-base-images.iam.gserviceaccount.com
+
     steps:
       - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
@@ -75,14 +76,23 @@ jobs:
       - name: Configuring container registry credentials
         run: gcloud auth configure-docker europe-docker.pkg.dev --quiet
 
+      - name: Start bob proxy
+        run: |
+          docker rm -f bob-proxy || true
+          docker run --name bob-proxy \
+            --network host \
+            -d -i -t \
+            eu.gcr.io/gitpod-core-dev/build/image-builder-mk3/bob:cw-bump-leeway.4 \
+            proxy --auth "$(cat ~/.docker/config.json)" --base-ref localhost/invalid ${{env.IMAGE_REPO}}
+
       - name: Dazzle build
         run: |
           cd dazzle-rewrite
-          dazzle build ${{env.IMAGE_REPO}} -v
+          dazzle build localhost:8080 -v
 
       - name: Dazzle combine
         run: |
           cd dazzle-rewrite
-          dazzle combine ${{env.IMAGE_REPO}} --all -v
+          dazzle combine localhost:8080 --all -v
       # - run: cd dazzle-rewrite && dazzle build europe-docker.pkg.dev/prince-tf-experiments/workspace-images${ARTIFACT_REPO_SUB_PATH}
       # - run: cd dazzle-rewrite && dazzle combine europe-docker.pkg.dev/prince-tf-experiments/workspace-images${ARTIFACT_REPO_SUB_PATH} --all
